@@ -1,7 +1,7 @@
 # Deck Simulator for Decked Out 2
-### Fabric Minecraft mod for 1.21.1 (Requires Fabric API)
+### Fabric Minecraft mod for 1.21-1.21.8 (Requires Fabric API)
 
-Download this mod at .
+Download this mod at https://modrinth.com/mod/decksimulator.
 
 This minecraft mod is to be used with TangoTek's creation of Decked Out 2. It also supports the expanded features offered by Garibaldi's team of developers at https://modrinth.com/modpack/decked-out-2.
 
