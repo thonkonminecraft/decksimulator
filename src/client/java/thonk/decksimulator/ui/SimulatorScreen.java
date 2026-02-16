@@ -87,6 +87,11 @@ public class SimulatorScreen extends Screen {
             return;
         }
 
+        if (ShulkerReader.containsPhaseCards(held)) {
+            deckDescription.setText("Phase decks are prohibited from being simulated!");
+            return;
+        }
+
         ArrayList<Card> deck = ShulkerReader.readDeckBox(held);
         if (deck.isEmpty() || deck.size() > 40) {
             deckDescription.setText("Deck is invalid size!");

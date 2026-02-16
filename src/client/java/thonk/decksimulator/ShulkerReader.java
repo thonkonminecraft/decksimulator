@@ -1,13 +1,31 @@
 package thonk.decksimulator;
 
 import net.minecraft.core.component.DataComponents;
+import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.ItemContainerContents;
+import net.minecraft.world.item.component.ItemLore;
 import thonk.decksimulator.simulation.Card;
 
 import java.util.ArrayList;
 
 public class ShulkerReader {
+
+    public static boolean containsPhaseCards(ItemStack held) {
+        ItemContainerContents contents = held.get(DataComponents.CONTAINER);
+        if (contents != null) {
+            for (ItemStack s : contents.nonEmptyItems()) {
+                ItemLore lore = s.get(DataComponents.LORE);
+                if (lore != null) {
+                    for (Component line : lore.lines()) {
+                        String text = line.getString();
+                        if (text.equals("-= Phase Card =-")) return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
 
     public static ArrayList<Card> readDeckBox(ItemStack held) {
         ArrayList<Card> cards = new ArrayList<>();
