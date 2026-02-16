@@ -8,8 +8,10 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Random;
+import java.util.Set;
 
 public class Simulation {
+    private final Settings settings;
 
     private ArrayList<Card> permanentDeck = new ArrayList<>();
     private ArrayList<Card> deck = new ArrayList<>();
@@ -17,6 +19,7 @@ public class Simulation {
     private float avgEmbers, avgCrowns, avgCoins, avgLVLOneKeys, avgLVLThreeKeys, avgLVLTwoKeys, avgTime, avgCardPlays;
     
     private int noSim;
+    private int infiniteRuns;
 
     private Deck activeDeck;
     private PlayerInventory inv;
@@ -97,34 +100,32 @@ public class Simulation {
     private Level level4;
 
     public Simulation() {
-        loadLevels();
+        settings = Settings.get();
         loadSettings();
+        loadLevels();
     }
 
     private void loadSettings() {
-        noSim = Settings.get().getNoSimulations();
+        noSim = settings.getNoSimulations();
 
-        targetLevel = Settings.get().getTargetLevel();
-        lvlOneTimeToExit = Settings.get().getLvlOneTimeToExit();
-        lvlOneTimeToArtifact = Settings.get().getLvlOneTimeToArtifact();
-        lvlTwoTimeToExit = Settings.get().getLvlTwoTimeToExit();
-        lvlTwoTimeToArtifact = Settings.get().getLvlTwoTimeToArtifact();
-        lvlThreeTimeToExit = Settings.get().getLvlThreeTimeToExit();
-        lvlThreeTimeToArtifact = Settings.get().getLvlThreeTimeToArtifact();
-        lvlFourTimeToArtifact = Settings.get().getLvlFourTimeToArtifact();
+        targetLevel = settings.getTargetLevel();
+        lvlOneTimeToExit = settings.getLvlOneTimeToExit();
+        lvlOneTimeToArtifact = settings.getLvlOneTimeToArtifact();
+        lvlTwoTimeToExit = settings.getLvlTwoTimeToExit();
+        lvlTwoTimeToArtifact = settings.getLvlTwoTimeToArtifact();
+        lvlThreeTimeToExit = settings.getLvlThreeTimeToExit();
+        lvlThreeTimeToArtifact = settings.getLvlThreeTimeToArtifact();
+        lvlFourTimeToArtifact = settings.getLvlFourTimeToArtifact();
 
-        // 1: ASAP
-        // 2: Run out of Cards, Treasure & Ember
-        // 3: Run out of Cards, Clank Block, Treasure & Ember
-        artifactClause = Settings.get().getArtifactClause();
-        exitClause = Settings.get().getExitClause();
+        artifactClause = settings.getArtifactClause();
+        exitClause = settings.getExitClause();
 
-        AdrenalineRushInput = Settings.get().getAdrenalineRushInput();
-        FeedingFrenzyInput = Settings.get().getFeedingFrenzyInput();
-        FrozenTearsInput = Settings.get().getFrozenTearsInput();
-        HopscotchInput = Settings.get().getHopscotchInput();
-        RavenousInclinationInput = Settings.get().getRavenousInclinationInput();
-        SpiritSenseInput = Settings.get().getSpiritSenseInput();
+        AdrenalineRushInput = settings.getAdrenalineRushInput();
+        FeedingFrenzyInput = settings.getFeedingFrenzyInput();
+        FrozenTearsInput = settings.getFrozenTearsInput();
+        HopscotchInput = settings.getHopscotchInput();
+        RavenousInclinationInput = settings.getRavenousInclinationInput();
+        SpiritSenseInput = settings.getSpiritSenseInput();
     }
 
     public void loadDeck(ArrayList<Card> deck) {
@@ -422,6 +423,7 @@ public class Simulation {
         BBSlippersActive = false; BootsofSwiftnessActive = false; DelvingGraceActive = false; FuzzyBunnySlippersActive = false;
         GloriousMomentActive = false; InNOutActive = false; RiskyReservesActive = false; SafeAndSoundActive = false; SilentRunnerActive = false;
         SpeedRunnerActive = false; SpendMoneyMakeMoneyActive = false; SuitUpActive = false;
+        infiniteRuns = 0;
     }
 
     private void resetRunStats() {
@@ -715,34 +717,45 @@ public class Simulation {
                 if (actionTime >= timeToArtifact) {
                     if (artifactClause == 1) pickupArtifact();
                     else if (artifactClause == 2) {
-                        if (activeDeck.isDeckEmpty() && treasureQueue == 0 && emberQueue == 0) pickupArtifact();
+                        if (activeDeck.isDeckEmpty()) pickupArtifact();
                     }
                     else if (artifactClause == 3) {
-                        if (activeDeck.isDeckEmpty() && clankBlock <= 3 && treasureQueue == 0 && emberQueue == 0) {
+                        if (activeDeck.isDeckEmpty() && clankBlock <= 3) {
                             pickupArtifact();
                         }
                     }
                 }
             }
             if (artifactFound) {
-                boolean shouldExit = false;
-                if (exitClause == 1) {
-                    shouldExit = true;
-                } else if (exitClause == 2) {
-                    shouldExit = activeDeck.isDeckEmpty() && treasureQueue == 0 && emberQueue == 0;
-                } else if (exitClause == 3) {
-                    shouldExit = activeDeck.isDeckEmpty() && clankBlock <= 3 && treasureQueue == 0 && emberQueue == 0;
-                }
-
+                boolean shouldExit = shouldExit();
                 if (shouldExit) {
                     int timeToArtifact = getTimeToArtifact();
                     if (actionTime >= timeToArtifact) {
                         currentLevel--;
                         actionTime = 0;
                     }
+                } else if (time >= 7200 && clankBlock == 0) {
+                    infiniteRuns++;
+                    currentLevel = 0;
                 }
             }
         }
+    }
+
+    private boolean shouldExit() {
+        boolean shouldExit = false;
+        if (exitClause == 1) {
+            shouldExit = true;
+        } else if (exitClause == 2) {
+            shouldExit = activeDeck.isDeckEmpty();
+        } else if (exitClause == 3) {
+            shouldExit = activeDeck.isDeckEmpty() && treasureQueue == 0 && emberQueue == 0;
+        } else if (exitClause == 4) {
+            shouldExit = activeDeck.isDeckEmpty() && clankBlock <= 0;
+        } else if (exitClause == 5) {
+            shouldExit = activeDeck.isDeckEmpty() && clankBlock <= 0 && treasureQueue == 0 && emberQueue == 0;
+        }
+        return shouldExit;
     }
 
     private int getTimeToArtifact() {
@@ -802,12 +815,13 @@ public class Simulation {
         // Post results
         ArrayList<String> results = new ArrayList<>();
         results.add("Avg. results of " + noSim + " L" + targetLevel + " run(s):");
-        results.add("Time: " + formatTime((long) avgTime) + " (" + avgCardPlays + " Cards)");
-        results.add("Embers: " + round(avgEmbers, d));
+        results.add("Time: " + formatTime((long) avgTime) + " (" + round(avgCardPlays, d) + " Cards)");
+        if (infiniteRuns > 0) results.add("Infinite Loot run(s): " + infiniteRuns);
+        results.add("Embers: " + round(avgEmbers, d) + " (" + round(avgEmbers / (avgTime / 60), d) + " EPM)");
         if (avgBonusEmbers > 0) results.add("Bonus Embers: " + round(avgBonusEmbers, d));
         results.add("Ember Queues: " + round(avgEmberQueue, d));
-        results.add("Crowns: " + round(avgCrowns, d));
-        results.add("Coins: " + round(avgCoins, d));
+        results.add("Crowns: " + round(avgCrowns, d) + " (" + round(avgCrowns / (avgTime / 60), d) + " CPM)");
+        results.add("Coins: " + round(avgCoins, d) + " (" + round(avgCoins / (avgTime / 60), d) + " cPM)");
         results.add("Keys: " + round(avgLVLOneKeys + avgLVLTwoKeys + avgLVLThreeKeys, d));
         results.add("Treasure Queues: " + round(avgTreasureQueue, d));
         results.add("Clank Block: " + round(avgClankBlock, d));

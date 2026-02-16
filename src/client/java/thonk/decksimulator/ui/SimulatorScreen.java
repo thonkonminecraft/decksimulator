@@ -16,8 +16,11 @@ import thonk.decksimulator.simulation.Simulation;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Set;
 
 public class SimulatorScreen extends Screen {
+    private final Settings settings;
+
     private final Screen parent;
 
     private MultiLineTextBox deckDescription;
@@ -29,6 +32,7 @@ public class SimulatorScreen extends Screen {
     public SimulatorScreen(Screen parent) {
         super(Component.literal("Deck Simulator"));
         this.parent = parent;
+        settings = Settings.get();
     }
 
     @Override
@@ -57,11 +61,11 @@ public class SimulatorScreen extends Screen {
         y = this.height / 2 - 110;
 
         this.addRenderableWidget(Button.builder(Component.literal("Simulate"), b -> simulate())
-                .bounds(cx - bw / 2, y, bw - 45, bh)
+                .bounds(cx - bw / 2, y, bw - 37, bh)
                 .build());
-        addNumberInput(y, cx - bw / 2 + bw - 40, bh, 40, 5, "No of Simulations",
-                Settings.get()::getNoSimulations,
-                Settings.get()::setNoSimulations);
+        addNumberInput(y, cx - bw / 2 + bw - 32, bh, 32, 4, "No of Simulations",
+                settings::getNoSimulations,
+                settings::setNoSimulations);
         y += bh + gap;
 
         simulationResults = new MultiLineTextBox(cx - ew / 2, y, ew, eh, Component.literal("Simulation Results"));
@@ -135,8 +139,7 @@ public class SimulatorScreen extends Screen {
 
     @Override
     public void render(GuiGraphics gfx, int mouseX, int mouseY, float delta) {
-        this.renderBackground(gfx, mouseX, mouseY, delta);
         super.render(gfx, mouseX, mouseY, delta);
-        gfx.drawCenteredString(this.font, this.title, this.width / 2, this.height / 2 - 130, 0xFFFFFF);
+        gfx.drawCenteredString(this.font, this.title, this.width / 2, this.height / 2 - 130, 0xFFFFFFFF);
     }
 }

@@ -99,7 +99,7 @@ public class MultiLineTextBox extends AbstractWidget {
         int maxY = cy2;
 
         for (int i = firstLine; i < wrapped.size() && y < maxY; i++) {
-            gfx.drawString(font, wrapped.get(i), cx1, y, 0xFFFFFF, false);
+            gfx.drawString(font, wrapped.get(i), cx1, y, 0xFFFFFFFF, false);
             y += lh;
         }
 

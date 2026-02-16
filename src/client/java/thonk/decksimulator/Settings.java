@@ -11,10 +11,12 @@ public class Settings {
 
     private int noSimulations = 1000;
 
-    private final int[] artifactClause = new int[]{1,2,3};
+    private static final int[] DEFAULT_ARTIFACT_CLAUSE = {1,2,3};
+    private int[] artifactClause = new int[]{1,2,3};
     private int artifactClauseIndex = 0;
 
-    private final int[] exitClause = new int[]{1,2,3};
+    private static final int[] DEFAULT_EXIT_CLAUSE = {1,2,3,4,5};
+    private int[] exitClause = new int[]{1,2,3,4,5};
     private int exitClauseIndex = 0;
 
     private int lvlOneTimeToExit = 60;
@@ -42,7 +44,12 @@ public class Settings {
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
 
     public static Settings get() {
-        if (instance == null) instance = load();
+        if (instance == null) {
+            instance = load();
+            if (instance.normalize()) {
+                instance.save();
+            }
+        }
         return instance;
     }
 
@@ -68,7 +75,9 @@ public class Settings {
         return switch (exitClause[exitClauseIndex]) {
             case 1 -> "ASAP";
             case 2 -> "Cards Used";
-            case 3 -> "Clank Block Used";
+            case 3 -> "Cards and Loot Used";
+            case 4 -> "Clank Block Used";
+            case 5 -> "Clank Block and Loot Used";
             default -> "Error";
         };
     }
@@ -132,6 +141,19 @@ public class Settings {
 
     public int getSpiritSenseInput() { return SpiritSenseInput; }
     public void setSpiritSenseInput(int val) { SpiritSenseInput = val; save(); }
+
+    private boolean normalize() {
+        boolean change = false;
+        if (exitClause == null || exitClause.length != DEFAULT_EXIT_CLAUSE.length) {
+            exitClause = DEFAULT_EXIT_CLAUSE.clone();
+            change = true;
+        }
+        if (artifactClause == null || artifactClause.length != DEFAULT_ARTIFACT_CLAUSE.length) {
+            artifactClause = DEFAULT_ARTIFACT_CLAUSE.clone();
+            change = true;
+        }
+        return change;
+    }
 
     private static Settings load() {
         try {

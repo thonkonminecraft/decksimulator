@@ -158,11 +158,12 @@ public class SettingsScreen extends Screen {
 
     @Override
     public void render(GuiGraphics gfx, int mouseX, int mouseY, float delta) {
-        this.renderBackground(gfx, mouseX, mouseY, delta);
         super.render(gfx, mouseX, mouseY, delta);
-        gfx.drawCenteredString(this.font, this.title, this.width / 2, this.height / 2 - 110, 0xFFFFFF);
+
         for (LabelEntry l : labels) {
-            gfx.drawCenteredString(this.font, l.text, l.x, l.y, 0xFFFFFF);
+            gfx.drawCenteredString(this.font, l.text, l.x, l.y, 0xFFFFFFFF);
         }
+
+        gfx.drawCenteredString(this.font, this.title, this.width / 2, this.height / 2 - 110, 0xFFFFFFFF);
     }
 }

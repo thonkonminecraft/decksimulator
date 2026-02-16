@@ -20,9 +20,9 @@
 	"clientMixins": [
 	],
 	"depends": {
-		"minecraft": "~1.21.1",
+		"minecraft": ">=1.21 <=1.21.8",
 		"java": ">=21",
 		"fabricloader": ">=0.15.11",
-		"fabric-api": ">=0.102.0+1.21.1"
+		"fabric-api": ">=0.102.0"
 	}
 }
